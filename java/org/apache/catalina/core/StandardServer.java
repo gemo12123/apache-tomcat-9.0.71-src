@@ -927,11 +927,13 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
     @Override
     protected void startInternal() throws LifecycleException {
 
+        // 触发CONFIGURE_START_EVENT事件，并设置当前状态
         fireLifecycleEvent(CONFIGURE_START_EVENT, null);
         setState(LifecycleState.STARTING);
 
         globalNamingResources.start();
 
+        // 调用service的start()方法
         // Start our defined Services
         synchronized (servicesLock) {
             for (Service service : services) {
@@ -996,6 +998,8 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
     }
 
     /**
+     * 允许连接器绑定到Unix操作环境下受限制的端口。
+     *
      * Invoke a pre-startup initialization. This is used to allow connectors
      * to bind to restricted ports under Unix operating environments.
      */
@@ -1023,9 +1027,12 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         // Register the naming resources
         globalNamingResources.init();
 
+        // 加载shared和common类加载器需要加载的类
         // Populate the extension validator with JARs from common and shared
         // class loaders
         if (getCatalina() != null) {
+            // Catalina的父加载器是sharedLoader，其设置是在Bootstrap类的init()方法中
+            // sharedLoader的父加载器是commonLoader
             ClassLoader cl = getCatalina().getParentClassLoader();
             // Walk the class loader hierarchy. Stop at the system class loader.
             // This will add the shared (if present) and common class loaders

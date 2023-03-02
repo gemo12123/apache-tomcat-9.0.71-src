@@ -28,6 +28,11 @@ import org.apache.tomcat.util.threads.TaskQueue;
 import org.apache.tomcat.util.threads.TaskThreadFactory;
 import org.apache.tomcat.util.threads.ThreadPoolExecutor;
 
+/**
+ * StandardThreadExecutor 并不是一个真正的线程池，
+ * 他只是持有了一个ThreadPoolExecutor线程池对象和一个TaskQueue对象。
+ * 其中，StandardThreadExecutor持有的 TaskQueue 对象和线程池中的阻塞队列是同一个对象（见startInternal()方法）
+ */
 public class StandardThreadExecutor extends LifecycleMBeanBase
         implements Executor, ResizableExecutor {
 

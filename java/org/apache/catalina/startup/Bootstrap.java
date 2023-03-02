@@ -263,9 +263,8 @@ public final class Bootstrap {
      */
     public void init() throws Exception {
         /**
-         * 始化commonLoader、catalinaLoader、sharedLoader类加载器
+         * 始化commonLoader、catalinaLoader、sharedLoader类加载器，
          * commonLoader是catalinaLoader、sharedLoader的父加载器
-         * 原因：
          */
         initClassLoaders();
 

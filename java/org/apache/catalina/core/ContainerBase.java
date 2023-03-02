@@ -867,6 +867,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
 
     @Override
     protected void initInternal() throws LifecycleException {
+        // 设置一个线程池来处理子容器启动和关闭事件
         reconfigureStartStopExecutor(getStartStopThreads());
         super.initInternal();
     }
@@ -916,6 +917,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
             results.add(startStopExecutor.submit(new StartChild(child)));
         }
 
+        // 引入一个MultiThrowable，来收集多个异常
         MultiThrowable multiThrowable = null;
 
         for (Future<Void> result : results) {
@@ -935,13 +937,16 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
                     multiThrowable.getThrowable());
         }
 
+        // 启动责任链的基础阀
         // Start the Valves in our pipeline (including the basic), if any
         if (pipeline instanceof Lifecycle) {
             ((Lifecycle) pipeline).start();
         }
 
+        // 状态设置
         setState(LifecycleState.STARTING);
 
+        // 调用最上层server的utilityExecutorWrapper 线程池去执行 ContainerBackgroundProcessorMonitor 任务
         // Start our thread
         if (backgroundProcessorDelay > 0) {
             monitorFuture = Container.getService(ContainerBase.this).getServer()
