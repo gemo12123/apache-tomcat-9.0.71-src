@@ -601,6 +601,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         endpoint.setName(endpointName.substring(1, endpointName.length()-1));
         endpoint.setDomain(domain);
 
+        // 调用 endpoint 的 start()
         endpoint.init();
     }
 
@@ -612,7 +613,9 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
             logPortOffset();
         }
 
+        // 调用 endpoint 的 start()
         endpoint.start();
+        // 启动一个异步的线程，处理startAsyncTimeout方法，每隔60秒执行一次
         monitorFuture = getUtilityExecutor().scheduleWithFixedDelay(
                 () -> {
                     startAsyncTimeout();

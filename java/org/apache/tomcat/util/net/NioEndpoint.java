@@ -227,10 +227,12 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel,SocketChannel> 
      */
     @Override
     public void bind() throws Exception {
+        // 初始化 ServerSocket
         initServerSocket();
 
         setStopLatch(new CountDownLatch(1));
 
+        // 初始化 Initialize
         // Initialize SSL if needed
         initialiseSsl();
     }
@@ -269,8 +271,11 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel,SocketChannel> 
                 }
             }
         } else {
+            // 默认进入到此处
+            // 打开ServerSocket通道
             serverSock = ServerSocketChannel.open();
             socketProperties.setProperties(serverSock.socket());
+            // 绑定到指定服务地址和端口，这样你才可以通过这个访问服务（处理请求）
             InetSocketAddress addr = new InetSocketAddress(getAddress(), getPortWithOffset());
             serverSock.bind(addr, getAcceptCount());
         }
@@ -301,6 +306,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel,SocketChannel> 
                         socketProperties.getBufferPool());
             }
 
+            // 创建了Executor，即创建了一个线程池
             // Create worker collection
             if (getExecutor() == null) {
                 createExecutor();

@@ -652,6 +652,10 @@ public abstract class AbstractEndpoint<S,U> {
     public int getAcceptCount() { return acceptCount; }
 
     /**
+     * 控制何时绑定端口。
+     * true：默认值在init()上绑定端口，在destroy()上取消绑定。
+     * false：则端口在start()时绑定，在stop()时解除绑定。
+     *
      * Controls when the Endpoint binds the port. <code>true</code>, the default
      * binds the port on {@link #init()} and unbinds it on {@link #destroy()}.
      * If set to <code>false</code> the port is bound on {@link #start()} and
@@ -1222,6 +1226,11 @@ public abstract class AbstractEndpoint<S,U> {
     public abstract void stopInternal() throws Exception;
 
 
+    /**
+     * 绑定端口，如果失败则解绑
+     *
+     * @throws Exception
+     */
     private void bindWithCleanup() throws Exception {
         try {
             bind();
@@ -1236,10 +1245,15 @@ public abstract class AbstractEndpoint<S,U> {
 
 
     public final void init() throws Exception {
+        //控制何时绑定端口。
+        //true：默认值在init()上绑定端口，在destroy()上取消绑定。
+        //false：则端口在start()时绑定，在stop()时解除绑定。
         if (bindOnInit) {
+            // 之前的版本中是直接调用bind方法，这里改成了bindWithCleanup, 变化点在于失败后的清理操作。
             bindWithCleanup();
             bindState = BindState.BOUND_ON_INIT;
         }
+        // 注册JMX
         if (this.domain != null) {
             // Register endpoint (as ThreadPool - historical name)
             oname = new ObjectName(domain + ":type=ThreadPool,name=\"" + getName() + "\"");
@@ -1309,6 +1323,7 @@ public abstract class AbstractEndpoint<S,U> {
 
 
     public final void start() throws Exception {
+        // 检查是否绑定端口，如果未绑定则进入绑定
         if (bindState == BindState.UNBOUND) {
             bindWithCleanup();
             bindState = BindState.BOUND_ON_START;

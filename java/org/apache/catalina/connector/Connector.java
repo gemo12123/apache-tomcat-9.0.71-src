@@ -1012,6 +1012,7 @@ public class Connector extends LifecycleMBeanBase  {
                     sm.getString("coyoteConnector.protocolHandlerInstantiationFailed"));
         }
 
+        // 初始化 adapter，衔接Container用于不同协议处理的适配器
         // Initialize adapter
         adapter = new CoyoteAdapter(this);
         protocolHandler.setAdapter(adapter);
@@ -1019,11 +1020,13 @@ public class Connector extends LifecycleMBeanBase  {
             protocolHandler.setUtilityExecutor(service.getServer().getUtilityExecutor());
         }
 
+        // 设置parseBody的方法，默认为POST
         // Make sure parseBodyMethodsSet has a default
         if (null == parseBodyMethodsSet) {
             setParseBodyMethods(getParseBodyMethods());
         }
 
+        // 校验
         if (protocolHandler.isAprRequired() && !AprStatus.isInstanceCreated()) {
             throw new LifecycleException(sm.getString("coyoteConnector.protocolHandlerNoAprListener",
                     getProtocolHandlerClassName()));
@@ -1044,6 +1047,7 @@ public class Connector extends LifecycleMBeanBase  {
         }
 
         try {
+            // 调用protocolHandler的init
             protocolHandler.init();
         } catch (Exception e) {
             throw new LifecycleException(
@@ -1070,6 +1074,7 @@ public class Connector extends LifecycleMBeanBase  {
         setState(LifecycleState.STARTING);
 
         try {
+            // 调用protocolHandler的start
             protocolHandler.start();
         } catch (Exception e) {
             throw new LifecycleException(

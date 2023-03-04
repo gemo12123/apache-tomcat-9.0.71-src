@@ -278,11 +278,13 @@ public class StandardEngine extends ContainerBase implements Engine {
 
         boolean logged = false;
 
+        // 如果有accessLog，则记录日志
         if (getAccessLog() != null) {
             accessLog.log(request, response, time);
             logged = true;
         }
 
+        // 没找到且使用useDefault，表示从下层容器中获取accessLog
         if (!logged && useDefault) {
             AccessLog newDefaultAccessLog = defaultAccessLog.get();
             if (newDefaultAccessLog == null) {
@@ -319,6 +321,7 @@ public class StandardEngine extends ContainerBase implements Engine {
                 }
 
                 if (newDefaultAccessLog == null) {
+                    // 这个其实是一个空模式，以便采用统一方式调用（不用判空了）
                     newDefaultAccessLog = new NoopAccessLog();
                     if (defaultAccessLog.compareAndSet(null,
                             newDefaultAccessLog)) {
@@ -329,6 +332,7 @@ public class StandardEngine extends ContainerBase implements Engine {
                 }
             }
 
+            // 最后记录日志，（上面最后有空模式实现，所以可以直接调用，不用判空）
             newDefaultAccessLog.log(request, response, time);
         }
     }

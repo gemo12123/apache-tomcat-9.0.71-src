@@ -1152,6 +1152,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
                 log.warn(sm.getString("containerBase.backgroundProcess.realm", realm), e);
             }
         }
+        // 遍历所有 valve 的 backgroundProcess()
         Valve current = pipeline.getFirst();
         while (current != null) {
             try {
