@@ -870,9 +870,9 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 if (securityManager != null) {
                     PrivilegedAction<Class<?>> dp =
                         new PrivilegedFindClassByName(name);
-                    //1. 先在 Web 应用目录下查找类
                     clazz = AccessController.doPrivileged(dp);
                 } else {
+                    //1. 先在 Web 应用目录下查找类
                     clazz = findClassInternal(name);
                 }
             } catch(AccessControlException ace) {
@@ -885,7 +885,8 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 }
                 throw e;
             }
-            //2. 如果在本地目录没有找到，交给父加载器去查找
+            //2. 如果在本地目录没有找到，查找父路径
+            // 很多资料描述为父类加载器？？？感觉不是很正确
             if ((clazz == null) && hasExternalRepositories) {
                 try {
                     clazz = super.findClass(name);
@@ -900,7 +901,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                     throw e;
                 }
             }
-            //3. 如果父类也没找到，抛出 ClassNotFoundException
+            //3. 如果父路径也没找到，抛出 ClassNotFoundException
             if (clazz == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("    --> Returning ClassNotFoundException");
@@ -1287,7 +1288,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 return clazz;
             }
 
-            // 3. 尝试用 Bootstrap 类加载器类加载
+            // 3. 尝试用 ExtClassLoader/BootstrapClassLoader 类加载器类加载
             // (0.2) Try loading the class with the bootstrap class loader, to prevent
             //       the webapp from overriding Java SE classes. This implements
             //       SRV.10.7.2
