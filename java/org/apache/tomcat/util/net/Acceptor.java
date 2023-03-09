@@ -87,12 +87,15 @@ public class Acceptor<U> implements Runnable {
                 // < 1ms       - tight loop
                 // 1ms to 10ms - 1ms sleep
                 // > 10ms      - 10ms sleep
+                // 1. 运行过程中，如果Endpoint暂停了，则Acceptor进行自旋
                 while (endpoint.isPaused() && !stopCalled) {
                     if (state != AcceptorState.PAUSED) {
+                        // 记录暂停事件并切换Acceptor状态
                         pauseStart = System.nanoTime();
                         // Entered pause state
                         state = AcceptorState.PAUSED;
                     }
+                    // 根据暂停时间计算sleep时间
                     if ((System.nanoTime() - pauseStart) > 1_000_000) {
                         // Paused for more than 1ms
                         try {
@@ -107,12 +110,14 @@ public class Acceptor<U> implements Runnable {
                     }
                 }
 
+                // 2. 如果`Endpoint`终止运行了，则`Acceptor`也会终止
                 if (stopCalled) {
                     break;
                 }
                 state = AcceptorState.RUNNING;
 
                 try {
+                    // 3. 检查当前最大连接数，若未达到maxConnections则加一，如果请求达到了最大连接数，则wait直到连接数降下来
                     //if we have reached max connections, wait
                     endpoint.countUpOrAwaitConnection();
 
@@ -124,6 +129,7 @@ public class Acceptor<U> implements Runnable {
 
                     U socket = null;
                     try {
+                        // 4. 通过endpoint接收Socket请求
                         // Accept the next incoming connection from the server
                         // socket
                         socket = endpoint.serverSocketAccept();
@@ -144,6 +150,7 @@ public class Acceptor<U> implements Runnable {
 
                     // Configure the socket
                     if (!stopCalled && !endpoint.isPaused()) {
+                        // 5. 将socket以事件的方式传递给poller
                         // setSocketOptions() will hand the socket off to
                         // an appropriate processor if successful
                         if (!endpoint.setSocketOptions(socket)) {

@@ -316,6 +316,7 @@ public class CoyoteAdapter implements Adapter {
     public void service(org.apache.coyote.Request req, org.apache.coyote.Response res)
             throws Exception {
 
+        // 处理request和response
         Request request = (Request) req.getNote(ADAPTER_NOTES);
         Response response = (Response) res.getNote(ADAPTER_NOTES);
 
@@ -349,6 +350,7 @@ public class CoyoteAdapter implements Adapter {
         req.setRequestThread();
 
         try {
+            // 对 Request 和 Response 做一些设置的工作，里面包扩了uri参数解析，Host映射等
             // Parse and set Catalina and configuration specific
             // request parameters
             postParseSuccess = postParseRequest(req, request, res, response);
@@ -598,6 +600,7 @@ public class CoyoteAdapter implements Adapter {
             request.setSecure(req.scheme().equals("https"));
         }
 
+        // proxyPort/proxyHost设置
         // At this point the Host header has been processed.
         // Override if the proxyPort/proxyHost are set
         String proxyName = connector.getProxyName();
@@ -616,6 +619,7 @@ public class CoyoteAdapter implements Adapter {
             req.serverName().setString(proxyName);
         }
 
+        // 请求uriMB设置
         MessageBytes undecodedURI = req.requestURI();
 
         // Check for ping OPTIONS * request
@@ -636,6 +640,7 @@ public class CoyoteAdapter implements Adapter {
             }
         }
 
+        // decodedUriMB设置
         MessageBytes decodedURI = req.decodedURI();
 
         if (undecodedURI.getType() == MessageBytes.T_BYTES) {
@@ -684,6 +689,7 @@ public class CoyoteAdapter implements Adapter {
             }
         }
 
+        // serverName获取
         // Request mapping.
         MessageBytes serverName;
         if (connector.getUseIPVHosts()) {
@@ -696,6 +702,7 @@ public class CoyoteAdapter implements Adapter {
             serverName = req.serverName();
         }
 
+        // version设置
         // Version for the second mapping loop and
         // Context that we expect to get for that version
         String version = null;
@@ -710,6 +717,7 @@ public class CoyoteAdapter implements Adapter {
         }
 
         while (mapRequired) {
+            // 处理映射信息
             // This will map the the latest version by default
             connector.getService().getMapper().map(serverName, decodedURI,
                     version, request.getMappingData());
